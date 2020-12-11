@@ -6,8 +6,8 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 
 module.exports = {
   siteMetadata: {
-    siteTitle: `Nishanth`,
-    siteTitleAlt: `Nishanth-blag`,
+    siteTitle: `blag`,
+    siteTitleAlt: `blag`,
   },
   plugins: [
     {
@@ -54,8 +54,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Nishanth-blag`,
-        short_name: `minimal-blag`,
+        name: `blag`,
+        short_name: `blag`,
         description: `Place where I share about my programming experiences, for my own journaling and also sharing the same with others.`,
         start_url: `/`,
         background_color: `#fff`,
