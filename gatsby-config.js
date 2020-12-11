@@ -6,7 +6,8 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 
 module.exports = {
   siteMetadata: {
-    siteTitleAlt: `Minimal Blog - Gatsby Theme`,
+    siteTitle: `Nishanth`,
+    siteTitleAlt: `Nishanth-blag`,
   },
   plugins: [
     {
@@ -19,9 +20,17 @@ module.exports = {
             slug: `/blog`,
           },
           {
+            title: `Daily`,
+            slug: `/daily`,
+          },
+          {
+            title: `Projects`,
+            slug: `/projects`,
+          },
+          {
             title: `About`,
             slug: `/about`,
-          },
+          }
         ],
         externalLinks: [
           {
@@ -45,9 +54,9 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `minimal-blog - @lekoarts/gatsby-theme-minimal-blog`,
-        short_name: `minimal-blog`,
-        description: `Typography driven, feature-rich blogging theme with minimal aesthetics. Includes tags/categories support and extensive features for code blocks such as live preview, line numbers, and code highlighting.`,
+        name: `Nishanth-blag`,
+        short_name: `minimal-blag`,
+        description: `Place where I share about my programming experiences, for my own journaling and also sharing the same with others.`,
         start_url: `/`,
         background_color: `#fff`,
         theme_color: `#6B46C1`,
