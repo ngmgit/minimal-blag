@@ -1,0 +1,111 @@
+---
+title: Practical OOP - Simple Polymorphism to avoid duplicate code
+date: 2018-12-05
+tags:
+  - Programming
+  - C#
+  - Unity3D
+  - OOP
+  - game-dev
+  - polymorphism
+---
+
+While working on a 2D Platformer game I was structuring and coming up with ideas to code NPC AI. To create the AI I chose the animator StateMachineBehavior (SMB) methodology. In this way I can have a State Machine based on NPC animator states thus giving me good control. NPCs in the game, in most of the cases have similar states say Idle, Walk, Attack, Hurt, Die as behaviour. Keeping this in mind I created a MonoBehavior Script which acts as the state for each of the NPC's SMB scripts. So this will be the base script which has state as well as methods which can be used by SMB scripts.
+
+SimpleNPCBase MonoBehavior Script - [link](https://github.com/ngmgit/gameoff2018/blob/a8d2d8ddada6305406de11cfa7ef21336fbd0ca4/Assets/Scripts/NPC/SimpleNPCBase.cs)
+
+In order for the SMB scripts to have access to the reference of this script instance w.r.t the gameobject Unity provides a way. [Communication between MonoBehaviours and StateMachineBehaviours.](https://unity3d.com/learn/tutorials/modules/beginner/5-pre-order-beta/state-machine-behaviours)
+
+Checkout the scripts in example [here](https://github.com/ngmgit/gameoff2018/tree/a8d2d8ddada6305406de11cfa7ef21336fbd0ca4/Assets/Scripts/NPC/UndeadGreen)
+
+```cpp
+public class UndeadGreenFSMBase : DefaultBaseFSM
+{
+	[HideInInspector]
+	public UndeadNPCScript MonoScriptRef;
+}
+
+public class UndeadIdleState: UndeadGreenFSMBase
+{
+    // make use of the MonoScriptRef
+}
+
+public class UndeadNPCScript : SimpleNPCBase
+{
+    void start()
+    {
+        //.....
+
+        anim.GetBehaviour<UndeadIdleState>().MonoScriptRef = this;
+
+        //.....
+    }
+}
+```
+
+This sets the variable `MonoScriptRef` of `UndeadGreenFSMBase` SMB script. Note here that the type of `MonoScripRef` is `UndeadNPCScript` which inherits from `SimpleNPCBase`.
+So for every NPC I need to have a `<Name\>FSMBase` script which has a member Type say `<Name\>NPCScript`.
+Due to different `<Name\>FSMBase` script the SMB scripts cannot be reused. Then these cannot be reused and attached to the animator state as a SMB Script as `MonoScriptRef` Type changes from NPC to NPC. IdleState, WalkState are same for every NPC which falls under category simple and can be seen that it doesnt change at all in logic making redundant code usage all over the project.
+
+![NPC class diagram before](./NPC-class-diag-before.png)
+
+From the figure, Each MonoBehavior inheriting from `SimpleNPCBase` script in the leaf node will be attached to its NPC GameObject and the SMB scripts in the leaf node inherting from `DefaultBaseFSM` will be attached to the states of the animtor of the specific NPC GameObject which has animator component attached.
+
+So we have to find a way to have Idle, Walk, etc as base scripts which can be applied to any Simple NPC. The issue which is stopping us from resusing those scripts is the reference to MonoBehavior script i.e MonoScriptRef variable in our case whose type changes from NPC to NPC i.e UndeadNPCScript, BanditNPCScript etc.
+
+## Fix and remove redundant script files
+
+To resolve this issue I made use of polymorphism concept. Since all the Simple NPC MonoBehavior script inherit from `SimpleNPCBase` the `DefaultBaseFSM` will now have a variable `MonoScriptRef` of type `SimpleNPCBase`. This way from every script which inherits from `SimpleNPCBase` can set the reference it self in the SMB scripts using the following statements.
+
+And also create default SMB scripts like Idle, Walk, Attack, Hurt.
+
+All these can be clearly seen by comparing the above and below class diagram.
+
+Note: The variable type of `MonoScriptRef` after change and before change. Before change we had to make it same as that of the derived ones. i.e `UndeadNPCScript` for below script.
+
+```cpp
+public class DefaultBaseFSM
+{
+	[HideInInspector]
+	public SimpleNPCBase MonoScriptRef;
+}
+
+
+public class UndeadNPCScript : SimpleNPCBase
+{
+    void Start()
+    {
+        // other init statemnts
+        // ...
+
+        // initialize the behavior scripts
+        anim.GetBehaviour<IdleSMB>().MonoScriptRef = this;
+        anim.GetBehaviour<WalkSMB>().MonoScriptRef = this;
+        anim.GetBehaviour<AttackSMB>().MonoScriptRef = this;
+        anim.GetBehaviour<HurtSMB>().MonoScriptRef = this;
+
+    }
+}
+```
+
+![NPC Class diag after](./NPC-class-diag-after.png)
+
+## Before vs After
+
+**Before:**
+
+For each NPC MonoBehavior script had to create a `<Name\>BaseFSM` with MonoScriptRef variable whose type is same as that of the MonoBehaviour script.
+Eg: For `UndeadNPCScript` its relevant SMB `UndeadGreenFSMBase` needs a `MonoScriptRef` variable of type `UndeadNPCScript`.
+Had to duplicate and create SMB script files with same logic for each of the states Idle, Walk, Attack, Hurt.
+
+**After:**
+
+Avoid duplicate SMB scripts and have default ones like IdleSMB, WalkSMB, AttackSMB, HurtSMB.
+From the diagram it can be seen that at first level there are default SMB scripts which can be used by any Simple NPC and in second level NPC which has additional states like AttackIdle can have a its own SMB script which can be easily added in the current setup.
+MonoBehavior script reference now has a type `SimpleNPCBase` which will be automatically casted when the reference is set using the following statement.
+
+```
+anim.GetBehaviour<IdleSMB>().MonoScriptRef = this;
+```
+
+Also checkout the file structure [before](https://github.com/ngmgit/gameoff2018/tree/a8d2d8ddada6305406de11cfa7ef21336fbd0ca4/Assets/Scripts/NPC) vs [after](https://github.com/ngmgit/gameoff2018/tree/master/Assets/Scripts/NPC).
