@@ -1,0 +1,181 @@
+---
+title: Setup C++ in VSCode Windows- GCC + GDB
+date: 2018-10-18
+tags:
+  - Programming
+  - C++
+  - editor
+  - vscode
+  - mingw
+  - gcc
+  - gdb
+---
+
+## Why I am writings this
+
+I think a simple google search will show articles related to this but those were not helpful to me when i setup on my windows environment. Especially setting up the gdb debugger. Which throws the error file not found as here: https://github.com/Microsoft/vscode-cpptools/issues/1546#issuecomment-365368570 and fixed it with `sourceFileMap` in `launch.json`.
+
+And also this post can be a good way to archive my vscode setup for windows.
+
+## Prepare for setup
+
+Below is the list of things to be installed before we start setting up vscode.
+
+1. MSYS2
+2. GCC
+
+So why are these two packages used? Firstly MSYS2 is required to install GCC. Also GCC can be installed in many other ways using cygwin or mingw.
+Usually other tutorials suggest using cygwin or mingw but MSYS2 provides the minimal linux subsystem and also comes with pacman to install packages. Since i use pacman on my linux distro i was quite comfortable using this and think that others will feel the same.
+
+- Get MSYS2 from here https://www.msys2.org/
+- Setup MSYS2, install the packages as show in the instruction on the home page and also set any environment variables if mentioned.
+- Make sure the packages below are installed using pacman.
+
+```
+base-devel
+msys2-devel
+mingw-w64-i686-toolchain
+mingw-w64-x86_64-toolchain
+```
+
+- If you have installed `mingw-w64-i686-toolchain` or `mingw-w64-x86_64-toolchain` then gcc will be included in that package.
+  Now that the requird packages are installed lets set the various config files required to make use of `g++` and `gdb` in vscode.
+
+## Setup VSCode
+
+To setup vscode to work with C++ we need to make sure the standard include paths are set for intellisense.
+Build tasks is setup which uses g++ from the installed GCC package.
+Debugger has to be setup in the `launch.json` file.
+
+### Setup include paths for intellisense
+
+- On installing GCC the standard header files are available in the directory `<MSYS2_DIR>/mingw64/include/c++/`.
+- These are to be setup in the `c_cpp_properties.json`.
+- A default config can be generated using the command palette `CTRL + Shift + P` and selecting `C/Cpp: Select a configuration` by typing in the selection box.
+- The generated config is placed in `.vscode` folder in the roor directory.
+
+```json
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "C:/msys64/mingw64/include/c++/8.2.0",
+        "C:/msys64/mingw64/include/c++/8.2.0/x86_64-w64-mingw32",
+        "C:/msys64/mingw64/include/c++/8.2.0/backward",
+        "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/8.2.0/include",
+        "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/8.2.0/include-fixed"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}/**",
+          "C:/msys64/mingw64/include/c++/8.2.0",
+          "C:/msys64/mingw64/include/c++/8.2.0/x86_64-w64-mingw32",
+          "C:/msys64/mingw64/include/c++/8.2.0/backward",
+          "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/8.2.0/include",
+          "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/8.2.0/include-fixed"
+        ]
+      },
+      "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+      "compilerPath": "C:/msys64/mingw64/bin/g++",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "clang-x64"
+    }
+  ],
+  "version": 4
+}
+```
+
+### Setup Build tasks
+
+Similar to the above scenario if there is no tasks.json generate one from the command palette by selecting `Tasks: Configure Task`.
+As per my use case i want to compile the current file active in the editor, to achieve this iam using `${file}` variable provided by vscode config variables.
+Also here `${filebasenameNoExtension}` is used to set the output for the compile file without any extension.
+
+```json
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Current File",
+      "type": "shell",
+      "command": "C:/msys64/mingw64/bin/g++",
+      "args": [
+        // Ask msbuild to generate full paths for file names.
+        "-g",
+        "-Wshadow",
+        "-Wall",
+        "-Wextra",
+        "-std=c++17",
+        "-o",
+        "${fileBasenameNoExtension}",
+        "'${file}'"
+      ],
+      "group": "build",
+      "presentation": {
+        // Reveal the output only if unrecognized errors occur.
+        "reveal": "silent"
+      },
+      // Use the standard MS compiler pattern to detect errors, warnings and infos
+      "problemMatcher": {
+        "base": "$gcc",
+        "fileLocation": "absolute"
+      }
+    }
+  ]
+}
+```
+
+### Setup Debugger using gdb
+
+To setup debugger the `program` and the `miDebuggerPath` is the important values to configured properly.
+
+- It is set in such a way that the debugger gets the name of the compiled file of the current active tab in the editor.
+- Also here for some reason the path was set incorrectly so i had to use `sourceFileMap`.
+
+```json
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/${fileBasenameNoExtension}",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/msys64/usr/bin/gdb.exe",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "sourceFileMap": {
+        "/g": "G:/"
+      }
+    }
+  ]
+}
+```
+
+## How to use this setup
+
+The config for build and debug is configured in such a way that it uses the filename of the current active file in the editor.
+So when a build task is run the file to be compiled will be fetched from ${file} variable provided by vscode.
+Similarly for gdb the compiled files for current open file is fetched from ${fileBasenameNoExtension} since the -o flag was set with that in the `tasks.json`.
+
+- To run the compile tasks open command palette and select `Tasks: Run Task` and select the Build tasks or name given in the taks.json say `"label": "Build Current File"` in current setup.
+- After build is finished successfully goto the debug section and run debug, but make sure the current active file is the one you want to debug.
