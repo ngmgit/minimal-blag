@@ -1,0 +1,112 @@
+---
+title: My first blog in Hexo
+date: 2018-09-29
+tags:
+  - blog
+  - how-to
+---
+
+## How to setup your first blog
+
+In this post I'll discuss the process i went through to setup my first blog in hexo. Also I'll suggest some helpful stuff to automate compilation of css and template changes without having to exit and run hexo serve everytime.
+
+Necessary links to get started:
+
+- Nodejs based static site generator: https://hexo.io/
+- Hexo Theme: https://github.com/Ben02/hexo-theme-Anatole
+- NVM Windows: https://github.com/coreybutler/nvm-windows
+
+### Initial Setup
+
+NVM is the preferred method to install nodejs. Although nvm is not available for Windows there is an alternative called [nvm-windows](https://github.com/coreybutler/nvm-windows) which can be used to install mulitple versions of nodejs.
+
+- After installing nvm install the latest LTS node version using the cmd
+
+```bash
+nvm list #fetch the available versions
+nvm install <version> # install the required version
+npm install -g hexo-cli #installs hexo
+```
+
+```
+Note: -g so that we can install the cli globally and access it in the shell
+```
+
+- Create a new folder which will be your blog directory and initialize hexo by issuing the `hexo init` cmd in that directory.
+- This will create a blog with default theme located in `themes` directory.
+- To run the current generated blog run `hexo serve`.
+- open your browser and goto `localhost:4000` to check if everything runs fine.
+
+Now that the required base setup is done we can now install the theme. Every theme has its own installation guidelines so checkout your themes respective readme/wiki sections.
+
+- Installation is straight forward, get the stable version of the theme from the [release section](https://github.com/Ben02/hexo-theme-Anatole/releases) of the github repository.
+- This theme also requires a npm package `hexo-render-pug`. Install this to ensure html will be generated.
+
+```bash
+npm install hexo-render-pug
+```
+
+- Extract to the themes folder and rename it to `anatole` or any other name you prefer.
+- Currently the default theme is set as `landscape` which can be changed in the `_config.yml` in the root directory.
+- Open `_config.yml` and set the theme entry to `anatole`.
+
+```yaml
+theme: anatole
+```
+
+- Now when you run `hexo serve` the new theme will be loaded. Refresh if already open.
+
+**Changes to the existing theme**
+
+Minor changes have been made to the theme as follow
+
+- Changed the side bar and content widths to 30% and 70% respectively.
+- Added margin to the title in the sidebar.
+- removed the margin for `p` tag.
+- removed the language files as the default language and set the language to `en` in `anatole/layout/layout.pug` else it will be set to zh-CN.
+- Modified the navbar layout file for the theme to reset the order and links `anatole/layout/partial/nav.pug`
+- Font color and size changes to the code tags.
+
+### Setup to speed up the development
+
+`hexo serve` doesnt pick up the changes to files made during development. In order to get the latest changes to the blog one has to quit the current running instance of hexo serve and run it again. This can be annoying but there is a way to avoid this.
+
+Note: This doesnt merge the changes made to the `_config.yml`.
+
+**Install node-sass to compile scss to css**
+
+First install node-sass to compile the changes from scss and generate a css file. All the changes to the css has to be made in styles.scss file.
+To compile the scss file to css run.
+To automate this for file changes we can add watch option -w.
+
+```bash
+# install
+npm install -g node-sass
+
+# compile
+node-sass ./style.scss ./style.css
+
+#compile with watch
+node-sass -w ./style.scss ./style.css
+```
+
+**Serve files without having to restart “hexo serve”**
+
+Now to serve the files without using `hexo serve`. This method requires first to generate the blog files using `hexo generate -w`, here option -w watches the file changes, which pushes generated blog files to `public` folder in the root directory and lastly serving this folder via http server.
+Use the npm package `http-server` to serve the generated blog.
+
+```bash
+#install
+npm install -g http-server
+
+#Serve generated blog
+http-server ./public
+```
+
+So a total of three instances of shell has to be run for each of the above commands to make this work.
+
+## What to do next
+
+The layout is created using template engine `pug`. To make any changes to the layout modify the themes layout files.
+Now that the basic setup is done we can continue writing blog posts using the Markup Language.
+Checkout the documentation for Hexo to customize the theme furthur to your liking.
