@@ -1,0 +1,214 @@
+---
+title: Unity3D- Understanding what Lerp does and how
+date: 2018-10-10
+tags:
+  - Programming
+  - Unity3D
+  - C#
+  - game-dev
+  - maths
+---
+
+## Why do we need Lerp in the first place
+
+Linear Interpolation or Lerping is a way to change value smoothly over time between two values. You might say i can do that by chaging the value by a certain speed by taking into account the deltaTime in the Update/FixedUpdate loop so why bother using the Lerp API. Additionally you might say we can use `Transform.MoveTowards` API. And yes you are correct if you want the movement to have constant velocity and dont want to have any damping or smoothness or ease applied.
+
+Ex: Moving a object and bring to halt smoothly but not abruptly.
+
+Here is an example of a game i am working on with and without Lerp.
+
+**Without Lerp**: Notice how the new ball and the balls behind it are shifted instantly.
+
+<iframe
+  src="https://gfycat.com/ifr/FoolishWhoppingBobolink"
+  width="950px"
+  height="500px"
+  frameborder="0"
+  allowfullscreen=""
+></iframe>
+
+**With Lerp**: Here the new ball takes its position smoothhly and the balls behind are also moved in a smooth manner.
+
+<iframe
+  src="https://gfycat.com/ifr/DescriptiveGiddyIbadanmalimbe"
+  width="950px"
+  height="500px"
+  frameborder="0"
+  allowfullscreen=""
+></iframe>
+
+## How to Lerp in Unity3D
+
+In Unity there are multiple Lerp API available to use but they all extend on `Mathf.Lerp`. Lerp takes 3 parameters start, end and percentage values.
+For example to move a Unity GameObject from Postion A to B one can use Vector3.Lerp API.
+
+```cpp
+object.transform.position = Vecto3.Lerp(A, B, t);
+```
+
+Here `t` is the percentage variables which calculates the percentage of path to be traversed. It takes values from 0 to 1.
+
+Read more at: https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
+
+## What is actually happening
+
+The output of Lerp depends based on the following cases for each frame.
+
+- Change only t value
+- Change of the parameter A or B or both
+- Change in all the values i.e A, B and t.
+
+So to clearly understand how lerp works lets dicuss these three cases. But i think the first case is very important to understand so read carefully.
+
+### Case 1: Change only t value
+
+If you have read the official docs for `Vector3.Lerp` (link above) you can see the example provided calculates a new `t` value for each update. So the only parameter changing here is `t`. lets see how this effects the output.
+
+```cpp
+using UnityEngine;
+using System.Collections;
+
+public class ExampleClass : MonoBehaviour
+{
+    // Transforms to act as start and end markers for the journey.
+    public Transform startMarker;
+    public Transform endMarker;
+
+    // Movement speed in units/sec.
+    public float speed = 1.0F;
+
+    // Time when the movement started.
+    private float startTime;
+
+    // Total distance between the markers.
+    private float journeyLength;
+
+    void Start()
+    {
+        // Keep a note of the time the movement started.
+        startTime = Time.time;
+
+        // Calculate the journey length.
+        journeyLength = Vector3.Distance(startMarker.position, endMarker.position);
+    }
+
+    // Follows the target position like with a spring
+    void Update()
+    {
+        // Distance moved = time * speed.
+        float distCovered = (Time.time - startTime) * speed;
+
+        // Fraction of journey completed = current distance divided by total distance.
+        float fracJourney = distCovered / journeyLength;
+
+        // Set our position as a fraction of the distance between the markers.
+        transform.position = Vector3.Lerp(startMarker.position, endMarker.position, fracJourney);
+    }
+}
+```
+
+source: https://docs.unity3d.com/ScriptReference/Vector3.Lerp.html
+
+Here intially we set the time at which it starts `startTime`, total distance to travel `journeyLength`. Also note that the start and end positions are not changed. This initial information can be used to traverse the path between start and end points and set the `t` to one which will increase from 0 to 1 each frame. The faster your increment the value the sooner you will reach the end position.
+
+And one way of doing this is to calculate the ratio i.e journey distane of `distCovered` to total distance `journeyLength` at each frame which will be used as `t`. Lets take a simple example to understand this. Say we have two points in one dimension at units 0 and 10. And we want to lerp between these two points.
+
+Here total distance is 10. Also lets assume that at each frame the `t` value is incrementd by 0.1 upon calculation. Which would mean 10%. So at each frame travel distance is incremented by 10% i.e 10% , 20% , 30% … 100%. But carefully **note that in this case the percentage will be applied to the total distane but not to the remaining distance**. This is the key point to observe here. This is beacuse we are not changing the starting point.
+
+See below table to understand the progression for the above example for above mentioned t values.
+
+here we have `t` , `t * totalDistance`, next positon for that frame
+
+```
+0.1 => 0.1 * 10 => 1
+0.2 => 0.2 * 10 => 2
+.
+.
+.
+0.9 => 0.9 * 10 => 9
+1.0 -> 1.0 * 10 => 10
+```
+
+This can be easily mapped to the 2D and 3D Vectors. Just by assuming that the above points are (0,0) and (0,10) for 2D and (0,0,0) and (0,0,10).
+
+**Different way to calculate t :**
+Also t can be calculated in other ways too, say we want to complete the journey in a certain amount of time then we can have a function which calculates the t by taking ratio of currentTime / targetTime, where currentTime is initialized to 0 and each frame it is set as `currentTime += Time.deltaTime`.
+
+In the below code we want the journey to complete in 1 sec i.e `targetTime = 1`;
+
+```cpp
+using UnityEngine;
+using System.Collections;
+
+public class ExampleClass : MonoBehaviour
+{
+    // Transforms to act as start and end markers for the journey.
+    public Transform startMarker;
+    public Transform endMarker;
+
+    // Move to the target in one sec.
+    public float targetTime = 1.0F;
+
+    // Total distance between the markers.
+    private float currentTime;
+
+    void Start()
+    {
+        // Marks the start time when the movement starts
+        currentTime = 0;
+    }
+
+    // Follows the target position like with a spring
+    void Update()
+    {
+        currentTime += Time.deltaTime;
+
+        // Fraction of journey completed = current distance divided by total distance.
+        float timeFrac = currentTime / targetTime;
+
+        // Set our position as a fraction of the distance between the markers.
+        transform.position = Vector3.Lerp(startMarker.position, endMarker.position, timeFrac);
+    }
+}
+```
+
+### Case 2: Change parameter A or B or both
+
+I feel that most of the beginners starting with lerp might have used this way to Lerp and thus getting unexpected results.
+
+Usually when a object is moved we set the start value i.e `A` to the current position of the object. Doing this will effectively change the position calculated for the frame in which the `A` is changed because the `t` is already incremented and the calculation usually happens based on fixed start and end.
+
+So if we have already travelled x distance from `A` and changed the start value from `A` to the current position then the next position calculated will be based on current Positon and `t` values.
+
+To understand this lets take the example from above.
+
+Say after we get t = 0.2 the position is 2 and at this instant we set `A` to 2.
+Then we have a totalDistance value = 10 -2 = 8 but not 10.
+So lets calculate the next position based on above changes at t= 0.3
+
+```
+at t = 0.3
+nextPos = t * remainingDistance = 0.3 * 8 = 2.4
+```
+
+So the next positon will be incremented by 2.4 units.
+
+Now lets check this value with that of the above case where start `A` is not changed and totalDistance is still 10.
+
+```
+at t =
+nextPos = t * totalDistance = 0.3 * 10 = 3
+```
+
+So in this case when we changed the start value i.e `A` the calculation takes the remaining distance into consideration.
+The same thing will happen if the end value B or both `A` and `B` are changed.
+
+### Case 3: Change all the parameters
+
+What if you want to change the position and also get the results same as that of the case 1.
+What can we do to get the value same as that of the case 1 even if we change the start `A` and end `B`.
+We can do that by adjusting t value.
+
+## What more can be done
+
+By adjusting the `t` value one can produce ease results like the ones mentioned [here](https://easings.net/). I hope this post was helpful to understand how lerp works and how the parameters effect the output.
