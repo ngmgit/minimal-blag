@@ -16,12 +16,12 @@ module.exports = {
       options: {
         navigation: [
           {
-            title: `Blog`,
-            slug: `/blog`,
-          },
-          {
             title: `Daily`,
             slug: `/daily`,
+          },
+          {
+            title: `Blog`,
+            slug: `/blog`,
           },
           {
             title: `Projects`,
@@ -34,13 +34,9 @@ module.exports = {
         ],
         externalLinks: [
           {
-            name: `Twitter`,
-            url: `https://twitter.com/lekoarts_de`,
-          },
-          {
-            name: `Instagram`,
-            url: `https://www.instagram.com/lekoarts.de/`,
-          },
+            name: `Github`,
+            url: `https://github.com/ngmgit`,
+          }
         ],
       },
     },
@@ -54,8 +50,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `blag`,
-        short_name: `blag`,
+        name: `Nishanth`,
+        short_name: `Nishanth`,
         description: `Place where I share about my programming experiences, for my own journaling and also sharing the same with others.`,
         start_url: `/`,
         background_color: `#fff`,
