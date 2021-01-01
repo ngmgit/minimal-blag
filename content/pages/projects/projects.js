@@ -5,7 +5,7 @@ export const SectionStyled = styled.div`
   margin: 20px 0 60px 0;
   padding: 0 20px;
   border: 1px solid #dbdbdb;
-  box-shadow: 0px 0px 5px #aeaeae80;
+  box-shadow: 5px 3px 5px #aeaeae80;
 
   .title {
     border-bottom: 2px solid #dfdfdf;
@@ -40,7 +40,7 @@ const projects = [
       label: 'Github Link',
       value: 'https://github.com/ngmgit/zuma-clone'
     },
-    media: () => <iframe src="https://gfycat.com/ifr/PotableActualHerald" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
+    media: () => <iframe src="https://gfycat.com/ifr/PotableActualHerald?autoplay=0" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
   },
   {
     startDate: '2018-09-15',
@@ -55,7 +55,7 @@ const projects = [
       label: 'Github Link',
       value: 'https://github.com/ngmgit/2d-grid'
     },
-    media: () => <iframe src="https://gfycat.com/ifr/AcclaimedDapperBass" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
+    media: () => <iframe src="https://gfycat.com/ifr/AcclaimedDapperBass?autoplay=0" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
   },
   {
     startDate: '2018-07-01',
@@ -70,7 +70,7 @@ const projects = [
       label: 'Github Link',
       value: 'https://github.com/ngmgit/platformer-2d'
     },
-    media: () => <iframe src="https://gfycat.com/ifr/OffbeatGlaringAcornwoodpecker" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
+    media: () => <iframe src="https://gfycat.com/ifr/OffbeatGlaringAcornwoodpecker?autoplay=0" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
   },
   {
     startDate: '2018-07-15',
@@ -88,7 +88,7 @@ const projects = [
       label: 'Github Link',
       value: 'https://github.com/ngmgit/3d-topdownshooter'
     },
-    media: () => <iframe src="https://gfycat.com/ifr/OfficialIdealEarwig" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
+    media: () => <iframe src="https://gfycat.com/ifr/OfficialIdealEarwig?autoplay=0" width="480px" height="320px" frameBorder="0" allowFullScreen=""></iframe>
   },
   {
     startDate: '2017-09-01',
