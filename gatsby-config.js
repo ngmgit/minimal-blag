@@ -6,8 +6,8 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 
 module.exports = {
   siteMetadata: {
-    siteTitle: `blag`,
-    siteTitleAlt: `blag`,
+    siteTitle: `Nishanth-blag`,
+    siteTitleAlt: `Nishanth-blag`,
   },
   plugins: [
     {
@@ -51,8 +51,8 @@ module.exports = {
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Nishanth`,
-        short_name: `Nishanth`,
+        name: `Nishanth-blag`,
+        short_name: `Nishanth-blag`,
         description: `Place where I share about my programming experiences, for my own journaling and also sharing the same with others.`,
         start_url: `/`,
         background_color: `#fff`,
@@ -80,6 +80,12 @@ module.exports = {
         analyzerMode: `static`,
         reportFilename: `_bundle.html`,
         openAnalyzer: false,
+      },
+    },
+    {
+      resolve: `gatsby-plugin-sass`,
+      options: {
+        implementation: require("sass"),
       },
     },
   ].filter(Boolean),
