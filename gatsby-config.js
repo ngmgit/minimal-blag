@@ -8,6 +8,7 @@ module.exports = {
   siteMetadata: {
     siteTitle: `Nishanth-blag`,
     siteTitleAlt: `Nishanth-blag`,
+    siteUrl: 'https://ngmgit.github.io'
   },
   plugins: [
     {
