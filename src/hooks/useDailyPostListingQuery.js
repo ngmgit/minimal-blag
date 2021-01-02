@@ -14,7 +14,7 @@ const useDailyPostListingQuery = () => {
             }
             slug
             timeToRead
-            date
+            date(formatString: "DD.MM.YYYY")
           }
         }
       }
